@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faXTwitter } from '@fortawesome/free-brands-svg-icons'
 import { faTelegram } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { getUserLocation } from './services/geolocation'
 
 library.add(faXTwitter, faTelegram)
 
@@ -11,6 +12,18 @@ const count = ref(0)
 const isOpen = ref(false)
 const totalPops = ref(3000000)
 const userCountryCode = ref('GH')
+const userFlag = ref('🇬🇭')
+
+onMounted(async () => {
+  const location = await getUserLocation()
+  if (location) {
+    userCountryCode.value = location.countryCode
+    const countryData = leaderboardData.value.find(item => item.code === location.countryCode)
+    if (countryData) {
+      userFlag.value = countryData.flag
+    }
+  }
+})
 const leaderboardData = ref([
   { position: 1, flag: '🇺🇸', code: 'US', score: 1000000, pps: 2.0, highlight: false },
   { position: 2, flag: '🇯🇵', code: 'JP', score: 800000, pps: 1.7, highlight: false },
