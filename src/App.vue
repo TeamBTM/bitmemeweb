@@ -13,8 +13,28 @@ const isOpen = ref(false)
 const totalPops = ref(0)
 const userCountryCode = ref('GH')
 const userFlag = ref('🇬🇭')
+const leaderboardData = ref([])
+
+// Load saved data from localStorage
+const loadSavedData = () => {
+  const savedCount = localStorage.getItem('popCount')
+  const savedTotalPops = localStorage.getItem('totalPops')
+  const savedLeaderboard = localStorage.getItem('leaderboard')
+
+  if (savedCount) count.value = parseInt(savedCount)
+  if (savedTotalPops) totalPops.value = parseInt(savedTotalPops)
+  if (savedLeaderboard) leaderboardData.value = JSON.parse(savedLeaderboard)
+}
+
+// Save data to localStorage
+const saveData = () => {
+  localStorage.setItem('popCount', count.value.toString())
+  localStorage.setItem('totalPops', totalPops.value.toString())
+  localStorage.setItem('leaderboard', JSON.stringify(leaderboardData.value))
+}
 
 onMounted(async () => {
+  loadSavedData()
   const location = await getUserLocation()
   if (location) {
     userCountryCode.value = location.countryCode
@@ -33,7 +53,6 @@ onMounted(async () => {
     }
   }
 })
-const leaderboardData = ref([])
 
 const updateLeaderboard = () => {
   leaderboardData.value.sort((a, b) => b.score - a.score)
@@ -46,6 +65,7 @@ const updateLeaderboard = () => {
     }
     item.position = index + 1
   })
+  saveData()
 }
 
 const handleClick = () => {
