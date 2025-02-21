@@ -18,9 +18,19 @@ onMounted(async () => {
   const location = await getUserLocation()
   if (location) {
     userCountryCode.value = location.countryCode
+    userFlag.value = location.flag
     const countryData = leaderboardData.value.find(item => item.code === location.countryCode)
-    if (countryData) {
-      userFlag.value = countryData.flag
+    if (!countryData) {
+      // Add user's country to leaderboard if not present
+      leaderboardData.value.push({
+        position: leaderboardData.value.length + 1,
+        flag: location.flag,
+        code: location.countryCode,
+        score: 0,
+        pps: 0,
+        highlight: false
+      })
+      updateLeaderboard()
     }
   }
 })
@@ -53,7 +63,7 @@ const handleClick = () => {
   
   const userCountry = leaderboardData.value.find(item => item.code === userCountryCode.value)
   if (userCountry) {
-    userCountry.score += Math.ceil(Math.random() * 5)
+    userCountry.score += 1
     userCountry.pps = +(userCountry.score / totalPops.value).toFixed(2)
     updateLeaderboard()
   }
@@ -79,7 +89,7 @@ const playPopSound = () => {
       
       <div class="nav-items">
         <div class="nav-item wallet-btn">Connect Wallet</div>
-        <div class="nav-item country">🇬🇭</div>
+        <div class="nav-item country">{{ userFlag }}</div>
         <div class="nav-item about">ABOUT $bitmeme</div>
         <div class="social-icons">
           <a href="#" class="twitter">

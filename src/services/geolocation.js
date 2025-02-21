@@ -1,21 +1,43 @@
-const IPIFY_API_KEY = 'at_your_api_key_here' // Replace with your actual ipify API key
-
 export async function getUserLocation() {
     try {
-        // First, get the IP address
-        const ipResponse = await fetch('https://api.ipify.org?format=json')
-        const ipData = await ipResponse.json()
+        // Using ipapi.co which provides geolocation data without requiring an API key
+        const response = await fetch('https://ipapi.co/json/')
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
         
-        // Then, get the location data using the IP
-        const geoResponse = await fetch(`https://geo.ipify.org/api/v2/country?apiKey=${IPIFY_API_KEY}&ipAddress=${ipData.ip}`)
-        const geoData = await geoResponse.json()
+        if (data.error) {
+            console.error('Error from ipapi:', data.reason)
+            return null
+        }
+        
+        // Convert country code to flag emoji
+        const countryFlag = getCountryFlag(data.country_code)
         
         return {
-            countryCode: geoData.location.country,
-            ip: ipData.ip
+            countryCode: data.country_code,
+            flag: countryFlag,
+            ip: data.ip
         }
     } catch (error) {
         console.error('Error fetching location:', error)
         return null
+    }
+}
+
+function getCountryFlag(countryCode) {
+    try {
+        if (!countryCode || typeof countryCode !== 'string' || countryCode.length !== 2) {
+            throw new Error('Invalid country code')
+        }
+        const codePoints = countryCode
+            .toUpperCase()
+            .split('')
+            .map(char => 127397 + char.charCodeAt())
+        return String.fromCodePoint(...codePoints)
+    } catch (error) {
+        console.error('Error generating country flag:', error)
+        return '🏳️' // Return a neutral flag in case of error
     }
 }
