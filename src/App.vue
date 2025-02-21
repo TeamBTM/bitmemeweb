@@ -10,7 +10,7 @@ library.add(faXTwitter, faTelegram)
 
 const count = ref(0)
 const isOpen = ref(false)
-const totalPops = ref(3000000)
+const totalPops = ref(0)
 const userCountryCode = ref('GH')
 const userFlag = ref('🇬🇭')
 
@@ -21,7 +21,6 @@ onMounted(async () => {
     userFlag.value = location.flag
     const countryData = leaderboardData.value.find(item => item.code === location.countryCode)
     if (!countryData) {
-      // Add user's country to leaderboard if not present
       leaderboardData.value.push({
         position: leaderboardData.value.length + 1,
         flag: location.flag,
@@ -34,15 +33,7 @@ onMounted(async () => {
     }
   }
 })
-const leaderboardData = ref([
-  { position: 1, flag: '🇺🇸', code: 'US', score: 1000000, pps: 2.0, highlight: false },
-  { position: 2, flag: '🇯🇵', code: 'JP', score: 800000, pps: 1.7, highlight: false },
-  { position: 3, flag: '🇬🇧', code: 'GB', score: 600000, pps: 1.3, highlight: false },
-  { position: 4, flag: '🇨🇳', code: 'CN', score: 500000, pps: 1.2, highlight: false },
-  { position: 5, flag: '🇧🇷', code: 'BR', score: 400000, pps: 1.0, highlight: false },
-  { position: 6, flag: '🇮🇳', code: 'IN', score: 300000, pps: 0.9, highlight: false },
-  { position: 7, flag: '🇬🇭', code: 'GH', score: 200000, pps: 0.8, highlight: false }
-])
+const leaderboardData = ref([])
 
 const updateLeaderboard = () => {
   leaderboardData.value.sort((a, b) => b.score - a.score)
@@ -116,17 +107,18 @@ const playPopSound = () => {
           <span>Leaderboard</span>
           <span class="arrow">▼</span>
         </div>
+
         <div class="total-pops">
-          <div class="label">TOTAL POPS</div>
+          <div class="label">Global Clicks</div>
           <div class="value">{{ totalPops.toLocaleString() }}</div>
         </div>
+
         <div class="leaderboard-content">
           <div v-for="item in leaderboardData" :key="item.position" class="leaderboard-item" :class="{ 'highlight': item.highlight, 'user-country': item.code === userCountryCode }">
             <span class="position">{{ item.position }}</span>
             <span class="flag">{{ item.flag }}</span>
             <span class="country-code">{{ item.code }}</span>
             <span class="score">{{ item.score.toLocaleString() }}</span>
-            <span class="pps">{{ item.pps }} PPS</span>
           </div>
         </div>
       </div>
