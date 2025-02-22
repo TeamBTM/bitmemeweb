@@ -1,11 +1,10 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faXTwitter } from '@fortawesome/free-brands-svg-icons'
 import { faTelegram } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { getUserLocation } from './services/geolocation'
-import { clicksTable } from './services/supabase'
 
 library.add(faXTwitter, faTelegram)
 
@@ -15,53 +14,76 @@ const totalPops = ref(0)
 const userCountryCode = ref('GH')
 const userFlag = ref('🇬🇭')
 const leaderboardData = ref([])
-let subscription = null
 
-const loadLeaderboardData = async () => {
-  leaderboardData.value = await clicksTable.getLeaderboard()
-  totalPops.value = await clicksTable.getTotalClicks()
+// Load saved data from localStorage
+const loadSavedData = () => {
+  const savedCount = localStorage.getItem('popCount')
+  const savedTotalPops = localStorage.getItem('totalPops')
+  const savedLeaderboard = localStorage.getItem('leaderboard')
+
+  if (savedCount) count.value = parseInt(savedCount)
+  if (savedTotalPops) totalPops.value = parseInt(savedTotalPops)
+  if (savedLeaderboard) leaderboardData.value = JSON.parse(savedLeaderboard)
+}
+
+// Save data to localStorage
+const saveData = () => {
+  localStorage.setItem('popCount', count.value.toString())
+  localStorage.setItem('totalPops', totalPops.value.toString())
+  localStorage.setItem('leaderboard', JSON.stringify(leaderboardData.value))
 }
 
 onMounted(async () => {
-  await loadLeaderboardData()
+  loadSavedData()
   const location = await getUserLocation()
   if (location) {
     userCountryCode.value = location.countryCode
     userFlag.value = location.flag
-  }
-
-  // Subscribe to real-time updates
-  subscription = clicksTable.subscribeToChanges(async () => {
-    await loadLeaderboardData()
-  })
-})
-
-onUnmounted(() => {
-  if (subscription) {
-    subscription.unsubscribe()
-  }
-})
-
-const handleClick = async () => {
-  try {
-    isOpen.value = true
-    playPopSound()
-    
-    const result = await clicksTable.incrementCountry(userCountryCode.value, userFlag.value)
-    if (result.error) {
-      console.error('Error incrementing country:', result.error)
-      return
+    const countryData = leaderboardData.value.find(item => item.code === location.countryCode)
+    if (!countryData) {
+      leaderboardData.value.push({
+        position: leaderboardData.value.length + 1,
+        flag: location.flag,
+        code: location.countryCode,
+        score: 0,
+        pps: 0,
+        highlight: false
+      })
+      updateLeaderboard()
     }
-    
-    count.value++
-    await loadLeaderboardData()
-  } catch (error) {
-    console.error('Error handling click:', error)
-  } finally {
-    setTimeout(() => {
-      isOpen.value = false
-    }, 100)
   }
+})
+
+const updateLeaderboard = () => {
+  leaderboardData.value.sort((a, b) => b.score - a.score)
+  leaderboardData.value.forEach((item, index) => {
+    if (item.position !== index + 1) {
+      item.highlight = true
+      setTimeout(() => {
+        item.highlight = false
+      }, 1000)
+    }
+    item.position = index + 1
+  })
+  saveData()
+}
+
+const handleClick = () => {
+  count.value++
+  totalPops.value++
+  
+  const userCountry = leaderboardData.value.find(item => item.code === userCountryCode.value)
+  if (userCountry) {
+    userCountry.score += 1
+    userCountry.pps = +(userCountry.score / totalPops.value).toFixed(2)
+    updateLeaderboard()
+  }
+  
+  isOpen.value = true
+  playPopSound()
+  setTimeout(() => {
+    isOpen.value = false
+  }, 100)
 }
 
 const playPopSound = () => {
