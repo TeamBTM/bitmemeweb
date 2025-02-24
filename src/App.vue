@@ -10,7 +10,7 @@ library.add(faXTwitter, faTelegram)
 
 import { clicksService } from './services/supabase'
 
-const count = ref(0)
+const count = ref(parseInt(localStorage.getItem('localClicks') || '0'))
 const isOpen = ref(false)
 const totalPops = ref(0)
 const userCountryCode = ref('GH')
@@ -73,6 +73,7 @@ const processClickQueue = async () => {
   const batch = clickQueue.splice(0, batchCount);
   
   count.value += batchCount;
+  localStorage.setItem('localClicks', count.value.toString());
   totalPops.value += batchCount;
   
   try {
