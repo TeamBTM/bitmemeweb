@@ -1,69 +1,63 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase credentials')
-}
+export const clicksService = {
+  async increment(countryCode, flag) {
+    try {
+      const { data, error } = await supabase
+        .from('country_clicks')
+        .select('clicks')
+        .eq('country_code', countryCode)
+        .single()
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+      const newClicks = (data?.clicks || 0) + 1
 
-export const clicksTable = {
-  async incrementCountry(countryCode, flag) {
-    const { data, error } = await supabase
-      .from('country_clicks')
-      .upsert([
-        {
-          country_code: countryCode,
-          flag,
-          clicks: 1
-        }
-      ], {
-        onConflict: 'country_code',
-        count: 'exact'
-      })
-    return { data, error }
+      const { error: upsertError } = await supabase
+        .from('country_clicks')
+        .upsert([
+          { country_code: countryCode, flag, clicks: newClicks }
+        ], {
+          onConflict: 'country_code'
+        })
+
+      if (upsertError) throw upsertError
+      return { success: true, clicks: newClicks }
+    } catch (error) {
+      console.error('Error incrementing clicks:', error)
+      return { success: false, error: error.message }
+    }
   },
 
-  async getLeaderboard() {
-    const { data, error } = await supabase
-      .from('country_clicks')
-      .select('country_code, flag, clicks')
-      .order('clicks', { ascending: false })
-      .limit(10)
+  async getTop10() {
+    try {
+      const { data, error } = await supabase
+        .from('country_clicks')
+        .select('country_code, flag, clicks')
+        .order('clicks', { ascending: false })
+        .limit(10)
 
-    if (error) {
-      console.error('Error fetching leaderboard:', error)
+      if (error) throw error
+
+      return data.map((item, index) => ({
+        position: index + 1,
+        code: item.country_code,
+        flag: item.flag,
+        score: item.clicks,
+        highlight: false
+      }))
+    } catch (error) {
+      console.error('Error fetching top 10:', error)
       return []
     }
-
-    return data.map((item, index) => ({
-      position: index + 1,
-      code: item.country_code,
-      flag: item.flag,
-      score: item.clicks
-    }))
   },
 
-  async getTotalClicks() {
-    const { data, error } = await supabase
-      .from('country_clicks')
-      .select('clicks')
-      .execute()
-
-    if (error) {
-      console.error('Error fetching total clicks:', error)
-      return 0
-    }
-
-    return data.reduce((sum, item) => sum + item.clicks, 0)
-  },
-
-  subscribeToChanges(callback) {
+  onUpdate(callback) {
     return supabase
-      .channel('country_clicks_changes')
+      .channel('clicks_channel')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',

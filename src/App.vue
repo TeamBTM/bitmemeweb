@@ -15,26 +15,10 @@ const userCountryCode = ref('GH')
 const userFlag = ref('🇬🇭')
 const leaderboardData = ref([])
 
-// Load saved data from localStorage
-const loadSavedData = () => {
-  const savedCount = localStorage.getItem('popCount')
-  const savedTotalPops = localStorage.getItem('totalPops')
-  const savedLeaderboard = localStorage.getItem('leaderboard')
 
-  if (savedCount) count.value = parseInt(savedCount)
-  if (savedTotalPops) totalPops.value = parseInt(savedTotalPops)
-  if (savedLeaderboard) leaderboardData.value = JSON.parse(savedLeaderboard)
-}
-
-// Save data to localStorage
-const saveData = () => {
-  localStorage.setItem('popCount', count.value.toString())
-  localStorage.setItem('totalPops', totalPops.value.toString())
-  localStorage.setItem('leaderboard', JSON.stringify(leaderboardData.value))
-}
 
 onMounted(async () => {
-  loadSavedData()
+
   const location = await getUserLocation()
   if (location) {
     userCountryCode.value = location.countryCode
@@ -46,7 +30,7 @@ onMounted(async () => {
         flag: location.flag,
         code: location.countryCode,
         score: 0,
-        pps: 0,
+
         highlight: false
       })
       updateLeaderboard()
@@ -65,7 +49,7 @@ const updateLeaderboard = () => {
     }
     item.position = index + 1
   })
-  saveData()
+
 }
 
 const handleClick = () => {
@@ -75,7 +59,7 @@ const handleClick = () => {
   const userCountry = leaderboardData.value.find(item => item.code === userCountryCode.value)
   if (userCountry) {
     userCountry.score += 1
-    userCountry.pps = +(userCountry.score / totalPops.value).toFixed(2)
+
     updateLeaderboard()
   }
   
@@ -259,12 +243,7 @@ header:hover {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.pps {
-  font-size: 12px;
-  color: #4CAF50;
-  font-weight: 600;
-  text-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
-}
+
 
 .wallet-btn {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
