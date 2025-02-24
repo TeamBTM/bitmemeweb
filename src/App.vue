@@ -142,7 +142,7 @@ const playPopSound = () => {
       <div class="nav-items">
         <div class="nav-item wallet-btn">Connect Wallet</div>
         <div class="nav-item country">{{ userFlag }}</div>
-        <div class="nav-item about">ABOUT $bitmeme</div>
+        <div class="nav-item about">ABOUT $BTM</div>
         <div class="social-icons">
           <a href="#" class="twitter">
             <font-awesome-icon :icon="['fab', 'x-twitter']" />
