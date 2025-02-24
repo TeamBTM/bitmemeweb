@@ -53,25 +53,69 @@ const updateLeaderboard = () => {
 
 }
 
-const handleClick = async () => {
-  count.value++
-  totalPops.value++
-  
-  // Increment clicks in Supabase
-  await clicksService.increment(userCountryCode.value, userFlag.value)
+const clickQueue = [];
+const batchSize = 100;
+let processingQueue = false;
 
+const processClickQueue = async () => {
+  if (processingQueue || clickQueue.length === 0) return;
+  
+  processingQueue = true;
+  const batchCount = Math.min(clickQueue.length, batchSize);
+  const batch = clickQueue.splice(0, batchCount);
+  
+  count.value += batchCount;
+  totalPops.value += batchCount;
+  
+  try {
+    const result = await clicksService.increment(userCountryCode.value, userFlag.value);
+    if (!result.success) {
+      console.error('Failed to update clicks:', result.error);
+    }
+  } catch (error) {
+    console.error('Error processing clicks:', error);
+  }
+  
+  processingQueue = false;
+  if (clickQueue.length > 0) {
+    setTimeout(processClickQueue, 50);
+  }
+};
+
+const handleClick = () => {
+  clickQueue.push(1);
+  isOpen.value = !isOpen.value;
+  
+  if (!processingQueue) {
+    processClickQueue();
+  }
+  isOpen.value = true
+  playPopSound()
+
+  // Optimistic update for user's country in leaderboard
   const userCountry = leaderboardData.value.find(item => item.code === userCountryCode.value)
   if (userCountry) {
     userCountry.score += 1
-
+    updateLeaderboard()
+  } else {
+    // If user's country is not in leaderboard, add it
+    leaderboardData.value.push({
+      position: leaderboardData.value.length + 1,
+      code: userCountryCode.value,
+      flag: userFlag.value,
+      score: 1,
+      highlight: false
+    })
     updateLeaderboard()
   }
-  
-  isOpen.value = true
-  playPopSound()
+
+  // Close cat mouth after animation
   setTimeout(() => {
     isOpen.value = false
   }, 100)
+
+  // Update Supabase in background
+  clicksService.increment(userCountryCode.value, userFlag.value)
 }
 
 const playPopSound = () => {
