@@ -27,14 +27,22 @@ onMounted(async () => {
     userFlag.value = location.flag
   }
 
-  // Load initial leaderboard data
-  const top10 = await clicksService.getTop10()
+  // Load initial leaderboard data and total clicks
+  const [top10, total] = await Promise.all([
+    clicksService.getTop10(),
+    clicksService.getTotalClicks()
+  ])
   leaderboardData.value = top10
+  totalPops.value = total
 
   // Subscribe to real-time updates
   clicksService.onUpdate(async (payload) => {
-    const top10 = await clicksService.getTop10()
+    const [top10, total] = await Promise.all([
+      clicksService.getTop10(),
+      clicksService.getTotalClicks()
+    ])
     leaderboardData.value = top10
+    totalPops.value = total
     updateLeaderboard()
   })
 })

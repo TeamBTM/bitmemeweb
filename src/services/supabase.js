@@ -6,29 +6,71 @@ const supabase = createClient(
 )
 
 export const clicksService = {
+  _localBuffer: new Map(),
+  _flushInterval: null,
+
   async increment(countryCode, flag) {
+    // Optimistic local update
+    this._updateLocalBuffer(countryCode, flag);
+    this._ensureFlushInterval();
+
+    return { success: true, clicks: this._getLocalClicks(countryCode) };
+  },
+
+  _updateLocalBuffer(countryCode, flag) {
+    const current = this._localBuffer.get(countryCode) || { count: 0, flag };
+    current.count++;
+    this._localBuffer.set(countryCode, current);
+  },
+
+  _getLocalClicks(countryCode) {
+    return (this._localBuffer.get(countryCode)?.count || 0);
+  },
+
+  _ensureFlushInterval() {
+    if (!this._flushInterval) {
+      this._flushInterval = setInterval(() => this._flushBuffer(), 2000);
+    }
+  },
+
+  async _flushBuffer() {
+    if (this._localBuffer.size === 0) return;
+
+    const buffer = new Map(this._localBuffer);
+    this._localBuffer.clear();
+
     try {
-      const { data, error } = await supabase
-        .from('country_clicks')
-        .select('clicks')
-        .eq('country_code', countryCode)
-        .single()
+      const promises = Array.from(buffer.entries()).map(async ([countryCode, data]) => {
+        try {
+          const { data: current } = await supabase
+            .from('country_clicks')
+            .select('clicks')
+            .eq('country_code', countryCode)
+            .single();
 
-      const newClicks = (data?.clicks || 0) + 1
+          const newClicks = (current?.clicks || 0) + data.count;
 
-      const { error: upsertError } = await supabase
-        .from('country_clicks')
-        .upsert([
-          { country_code: countryCode, flag, clicks: newClicks }
-        ], {
-          onConflict: 'country_code'
-        })
+          await supabase
+            .from('country_clicks')
+            .upsert([{
+              country_code: countryCode,
+              flag: data.flag,
+              clicks: newClicks
+            }], {
+              onConflict: 'country_code'
+            });
+        } catch (error) {
+          console.error(`Error updating clicks for ${countryCode}:`, error);
+          // Restore failed updates back to buffer
+          const existing = this._localBuffer.get(countryCode) || { count: 0, flag: data.flag };
+          existing.count += data.count;
+          this._localBuffer.set(countryCode, existing);
+        }
+      });
 
-      if (upsertError) throw upsertError
-      return { success: true, clicks: newClicks }
+      await Promise.all(promises);
     } catch (error) {
-      console.error('Error incrementing clicks:', error)
-      return { success: false, error: error.message }
+      console.error('Error in flush operation:', error);
     }
   },
 
@@ -52,6 +94,21 @@ export const clicksService = {
     } catch (error) {
       console.error('Error fetching top 10:', error)
       return []
+    }
+  },
+
+  async getTotalClicks() {
+    try {
+      const { data, error } = await supabase
+        .from('country_clicks')
+        .select('clicks')
+
+      if (error) throw error
+
+      return data.reduce((total, item) => total + item.clicks, 0)
+    } catch (error) {
+      console.error('Error fetching total clicks:', error)
+      return 0
     }
   },
 
