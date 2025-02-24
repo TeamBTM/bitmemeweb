@@ -8,6 +8,8 @@ import { getUserLocation } from './services/geolocation'
 
 library.add(faXTwitter, faTelegram)
 
+import { clicksService } from './services/supabase'
+
 const count = ref(0)
 const isOpen = ref(false)
 const totalPops = ref(0)
@@ -18,24 +20,23 @@ const leaderboardData = ref([])
 
 
 onMounted(async () => {
-
+  // Get user location
   const location = await getUserLocation()
   if (location) {
     userCountryCode.value = location.countryCode
     userFlag.value = location.flag
-    const countryData = leaderboardData.value.find(item => item.code === location.countryCode)
-    if (!countryData) {
-      leaderboardData.value.push({
-        position: leaderboardData.value.length + 1,
-        flag: location.flag,
-        code: location.countryCode,
-        score: 0,
-
-        highlight: false
-      })
-      updateLeaderboard()
-    }
   }
+
+  // Load initial leaderboard data
+  const top10 = await clicksService.getTop10()
+  leaderboardData.value = top10
+
+  // Subscribe to real-time updates
+  clicksService.onUpdate(async (payload) => {
+    const top10 = await clicksService.getTop10()
+    leaderboardData.value = top10
+    updateLeaderboard()
+  })
 })
 
 const updateLeaderboard = () => {
@@ -52,10 +53,13 @@ const updateLeaderboard = () => {
 
 }
 
-const handleClick = () => {
+const handleClick = async () => {
   count.value++
   totalPops.value++
   
+  // Increment clicks in Supabase
+  await clicksService.increment(userCountryCode.value, userFlag.value)
+
   const userCountry = leaderboardData.value.find(item => item.code === userCountryCode.value)
   if (userCountry) {
     userCountry.score += 1
