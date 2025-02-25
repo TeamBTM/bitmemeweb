@@ -5,6 +5,7 @@ import { faXTwitter } from '@fortawesome/free-brands-svg-icons'
 import { faTelegram } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { getUserLocation } from './services/geolocation'
+import CryptoTicker from './components/CryptoTicker.vue'
 
 library.add(faXTwitter, faTelegram)
 
@@ -168,6 +169,7 @@ const playPopSound = () => {
         </div>
       </div>
     </main>
+    <CryptoTicker />
   </div>
 </template>
 

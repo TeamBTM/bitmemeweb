@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { getUserLocation } from './services/geolocation'
 import Header from './components/Header.vue'
+import CryptoTicker from './components/CryptoTicker.vue'
 
 const userFlag = ref('🏳️')
 const userCountryCode = ref('')
@@ -19,6 +20,7 @@ onMounted(async () => {
   <div class="app-container">
     <Header :userFlag="userFlag" :userCountryCode="userCountryCode" />
     <router-view />
+    <CryptoTicker />
   </div>
 </template>
 
