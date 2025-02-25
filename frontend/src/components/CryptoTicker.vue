@@ -16,6 +16,72 @@
   </div>
 </template>
 
+<style scoped>
+.crypto-ticker-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(30, 27, 75, 0.8);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  height: 32px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.crypto-ticker {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ticker-content {
+  display: flex;
+  animation: ticker calc(var(--total-items) * 8s) linear infinite;
+  white-space: nowrap;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crypto-symbol {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.crypto-price {
+  margin-right: 6px;
+}
+
+.price-change {
+  font-size: 11px;
+}
+
+.price-up {
+  color: #10B981;
+}
+
+.price-down {
+  color: #EF4444;
+}
+
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+</style>
+
 <script>
 export default {
   name: 'CryptoTicker',
