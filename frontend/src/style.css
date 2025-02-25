@@ -84,11 +84,16 @@ button:focus-visible {
 
 /* Header styles */
 header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  padding: 4px 8px;
+  margin: 1rem;
+  padding: 0.75rem 1.5rem;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -114,6 +119,13 @@ header:hover {
 
 /* Navigation styles */
 .nav-items {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.nav-links {
   display: flex;
   gap: 4px;
   align-items: center;
@@ -403,7 +415,8 @@ header:hover {
 /* About Page Styles */
 .about-page {
   min-height: 100vh;
-  padding: 2rem;
+  padding: 4rem 2rem 2rem;
+  background: linear-gradient(135deg, var(--background-start), var(--background-end));
 }
 
 .about-container {
@@ -607,10 +620,10 @@ header:hover {
 /* Wallet Page Styles */
 .wallet-page {
   min-height: 100vh;
+  padding: 4rem 2rem 2rem;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 2rem;
+  align-items: flex-start;
 }
 
 .wallet-container {
@@ -663,7 +676,8 @@ header:hover {
 /* About Page Styles */
 .about-page {
   min-height: 100vh;
-  padding: 2rem;
+  padding: 4rem 2rem 2rem;
+  background: linear-gradient(135deg, var(--background-start), var(--background-end));
 }
 
 .about-container {

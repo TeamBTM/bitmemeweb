@@ -3,46 +3,14 @@ import { ref } from 'vue'
 
 const sections = ref({
   aboutUs: {
-    title: "WTF is BitMeme? 🤔🚀",
-    subtitle: "(Spoiler: It's Like Bitcoin, but with Memes and More 🐕✨)",
-    concept: "BitMeme is the first memeable crypto project that combines laughs, chaotic clicking, and absurd rewards. Imagine Shiba Inu and Dogecoin at a party with a clicker game and meme NFTs. 🎮🐸 That's BitMeme! No joke: here, memes earn tokens, clicks conquer countries, and your cat could become rich (or at least viral).",
-    mission: "#MMGA (Make Memes Great Again) 🇺🇸🍔",
-    missionDesc: "We're giving power back to meme lords, gamers, and professional procrastinators. Because memes aren't just for laughs… they're for profit! 💸🚀",
-    vision: "To become the TikTok of crypto: a place where creativity (and your lightning-fast clicking finger) fills your wallet with $BTM. The dream? Let your meme pay for your pizza 🍕… or your Lambo. 🚗💨"
+    title: "🌟 Welcome to BitMeme ($BTM)",
+    subtitle: "Where Memes Meet Blockchain Magic ✨",
+    concept: "BitMeme is not just another crypto project - it's a revolution in the meme economy. We're building a platform where memes aren't just funny pictures; they're valuable digital assets.",
+    mission: "To make crypto fun again!",
+    missionDesc: "We believe blockchain technology should be accessible, enjoyable, and maybe a little bit silly.",
+    vision: "Creating the world's first truly decentralized meme economy, where creativity meets value, and laughter meets innovation."
   },
   ecosystem: {
-    title: "🌍 The BitMeme Ecosystem: Where Clicks and Memes Rule 🕹️🤯",
-    features: [
-      {
-        title: "🖱️ Global Click Game",
-        description: "\"Click or get clicked!\" Battle to make your country #1. Top 10 countries win $BTM… and last place gets eternal meme shame. 🏆👀"
-      },
-      {
-        title: "🎨 Meme Factory (v.2.0)",
-        description: "Create memes in 30 seconds with templates. If your meme goes viral, we'll mint it as an NFT… and you'll become a legend. 🔥"
-      },
-      {
-        title: "💰 Meme Marketplace",
-        description: "Buy/sell meme NFTs like \"Grumpy Cat 2.0\" or \"Elon Musk Dancing Reggaeton.\" 💃📈"
-      },
-      {
-        title: "🎮 Epic Quests",
-        description: "Complete challenges like \"Click 1,000 times\" or \"Get your grandma to make a meme\" for $BTM rewards! 👵📱"
-      }
-    ]
-  },
-  tokenomics: {
-    title: "💰 $BTM Tokenomics: Memes That Print $$$ 🤑🥧",
-    supply: "1,000,000,000,000 BTM",
-    distribution: [
-      { title: "Community", value: "50%", description: "For the click gods and meme kings/queens 👑" },
-      { title: "Team", value: "20%", description: "Locked for 2 years (we promise not to flee to the Bahamas... yet) 🏝️🔒" },
-      { title: "Partners", value: "15%", description: "Includes your uncle's crypto YouTube channel 📱🤝" },
-      { title: "Public Sale", value: "10%", description: "For you, the legend reading this! 🎟️" },
-      { title: "Charity", value: "5%", description: "Donations to causes like \"Save the Forgotten 2012 Memes\" 🐸❤️" }
-    ]
-  },
-  roadmap: {
     title: "🚀 Roadmap: From Zero to Meme Hero (No Cape Needed)",
     phases: [
       {
@@ -109,41 +77,9 @@ const sections = ref({
       <section class="ecosystem-section">
         <h2 class="section-title">{{ sections.ecosystem.title }}</h2>
         <div class="ecosystem-grid">
-          <div v-for="(feature, index) in sections.ecosystem.features"
+          <div v-for="(phase, index) in sections.ecosystem.phases"
                :key="index"
                class="ecosystem-card">
-            <h3>{{ feature.title }}</h3>
-            <p>{{ feature.description }}</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tokenomics Section -->
-      <section class="tokenomics-section">
-        <h2 class="section-title">{{ sections.tokenomics.title }}</h2>
-        <div class="supply-card">
-          <h3>Total Supply</h3>
-          <p class="supply-value">{{ sections.tokenomics.supply }}</p>
-        </div>
-
-        <div class="distribution-grid">
-          <div v-for="(item, index) in sections.tokenomics.distribution"
-               :key="index"
-               class="distribution-card">
-            <h4>{{ item.title }}</h4>
-            <p class="value">{{ item.value }}</p>
-            <p class="description">{{ item.description }}</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Roadmap Section -->
-      <section class="roadmap-section">
-        <h2 class="section-title">{{ sections.roadmap.title }}</h2>
-        <div class="roadmap-timeline">
-          <div v-for="(phase, index) in sections.roadmap.phases"
-               :key="index"
-               class="roadmap-phase">
             <h3>{{ phase.title }}</h3>
             <ul>
               <li v-for="(item, itemIndex) in phase.items"

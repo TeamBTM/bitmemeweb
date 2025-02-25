@@ -1,17 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faXTwitter } from '@fortawesome/free-brands-svg-icons'
-import { faTelegram } from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { getUserLocation } from '../services/geolocation'
+import { clicksService } from '../services/supabase'
 import openCatImg from '../assets/images/open-cat.png'
 import closeCatImg from '../assets/images/close-cat.png'
-
-library.add(faXTwitter, faTelegram)
-
-import { clicksService } from '../services/supabase'
 
 const router = useRouter()
 const count = ref(parseInt(localStorage.getItem('localClicks') || '0'))
@@ -22,14 +15,12 @@ const userFlag = ref('🇬🇭')
 const leaderboardData = ref([])
 
 onMounted(async () => {
-  // Get user location
   const location = await getUserLocation()
   if (location) {
     userCountryCode.value = location.countryCode
     userFlag.value = location.flag
   }
 
-  // Load initial leaderboard data and total clicks
   const [top10, total] = await Promise.all([
     clicksService.getTop10(),
     clicksService.getTotalClicks()
@@ -37,14 +28,13 @@ onMounted(async () => {
   leaderboardData.value = top10
   totalPops.value = total
 
-  // Subscribe to real-time updates
-  clicksService.onUpdate(async (payload) => {
-    const [top10, total] = await Promise.all([
+  clicksService.onUpdate(async () => {
+    const [updatedTop10, updatedTotal] = await Promise.all([
       clicksService.getTop10(),
       clicksService.getTotalClicks()
     ])
-    leaderboardData.value = top10
-    totalPops.value = total
+    leaderboardData.value = updatedTop10
+    totalPops.value = updatedTotal
     updateLeaderboard()
   })
 })
@@ -99,16 +89,14 @@ const handleClick = () => {
   if (!processingQueue) {
     processClickQueue()
   }
-  isOpen.value = true
+
   playPopSound()
 
-  // Optimistic update for user's country in leaderboard
   const userCountry = leaderboardData.value.find(item => item.code === userCountryCode.value)
   if (userCountry) {
     userCountry.score += 1
     updateLeaderboard()
   } else {
-    // If user's country is not in leaderboard, add it
     leaderboardData.value.push({
       position: leaderboardData.value.length + 1,
       code: userCountryCode.value,
@@ -119,13 +107,9 @@ const handleClick = () => {
     updateLeaderboard()
   }
 
-  // Close cat mouth after animation
   setTimeout(() => {
     isOpen.value = false
   }, 100)
-
-  // Update Supabase in background
-  clicksService.increment(userCountryCode.value, userFlag.value)
 }
 
 const playPopSound = () => {
@@ -139,35 +123,10 @@ const playPopSound = () => {
   const audio = new Audio(randomSound)
   audio.play()
 }
-const navigateToAbout = () => {
-  router.push('/about')
-}
-
-const connectWallet = () => {
-  // Implement wallet connection logic here
-  console.log('Connecting wallet...')
-}
-
 </script>
 
 <template>
   <div class="container">
-    <header>
-      <div class="nav-items">
-        <router-link to="/wallet" class="nav-item wallet-btn">Connect Wallet</router-link>
-        <div class="nav-item country">{{ userFlag }}</div>
-        <router-link to="/about" class="nav-item about">ABOUT $BTM</router-link>
-        <div class="social-icons">
-          <a href="https://twitter.com/BTMCoin" target="_blank" class="twitter">
-            <font-awesome-icon :icon="['fab', 'x-twitter']" />
-          </a>
-          <a href="https://t.me/BTMCoin" target="_blank" class="telegram">
-            <font-awesome-icon :icon="['fab', 'telegram']" />
-          </a>
-        </div>
-      </div>
-    </header>
-
     <main>
       <div class="cat-container" @click="handleClick">
         <img :src="isOpen ? openCatImg : closeCatImg" alt="PopCat" class="cat-image" />
@@ -188,7 +147,15 @@ const connectWallet = () => {
         </div>
 
         <div class="leaderboard-content">
-          <div v-for="item in leaderboardData" :key="item.position" class="leaderboard-item" :class="{ 'highlight': item.highlight, 'user-country': item.code === userCountryCode }">
+          <div
+            v-for="item in leaderboardData"
+            :key="item.position"
+            class="leaderboard-item"
+            :class="{
+              'highlight': item.highlight,
+              'user-country': item.code === userCountryCode
+            }"
+          >
             <span class="position">{{ item.position }}</span>
             <span class="flag">{{ item.flag }}</span>
             <span class="country-code">{{ item.code }}</span>
@@ -199,7 +166,3 @@ const connectWallet = () => {
     </main>
   </div>
 </template>
-
-<style>
-/* Component styles moved to style.css */
-</style>

@@ -9,6 +9,7 @@ import { getUserLocation } from './services/geolocation'
 library.add(faXTwitter, faTelegram)
 
 import { clicksService } from './services/supabase'
+import Header from '../frontend/src/components/Header.vue'
 
 const count = ref(parseInt(localStorage.getItem('localClicks') || '0'))
 const isOpen = ref(false)
@@ -137,25 +138,8 @@ const playPopSound = () => {
 
 <template>
   <div class="container">
-    <header>
-      
-      <div class="nav-items">
-        <div class="nav-item wallet-btn">Connect Wallet</div>
-        <div class="nav-item country">{{ userFlag }}</div>
-        <div class="nav-item about">ABOUT $BTM</div>
-        <div class="social-icons">
-          <a href="#" class="twitter">
-            <font-awesome-icon :icon="['fab', 'x-twitter']" />
-          </a>
-          <a href="#" class="telegram">
-            <font-awesome-icon :icon="['fab', 'telegram']" />
-          </a>
-        </div>
-      </div>
-    </header>
-
+    <Header :userFlag="userFlag" />
     <main>
-      
       <div class="cat-container" @click="handleClick">
         <img :src="isOpen ? '/open-cat.png' : '/close-cat.png'" alt="PopCat" class="cat-image" />
       </div>
