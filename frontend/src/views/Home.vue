@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faXTwitter } from '@fortawesome/free-brands-svg-icons'
 import { faTelegram } from '@fortawesome/free-brands-svg-icons'
@@ -12,6 +13,7 @@ library.add(faXTwitter, faTelegram)
 
 import { clicksService } from '../services/supabase'
 
+const router = useRouter()
 const count = ref(parseInt(localStorage.getItem('localClicks') || '0'))
 const isOpen = ref(false)
 const totalPops = ref(0)
@@ -137,20 +139,29 @@ const playPopSound = () => {
   const audio = new Audio(randomSound)
   audio.play()
 }
+const navigateToAbout = () => {
+  router.push('/about')
+}
+
+const connectWallet = () => {
+  // Implement wallet connection logic here
+  console.log('Connecting wallet...')
+}
+
 </script>
 
 <template>
   <div class="container">
     <header>
       <div class="nav-items">
-        <div class="nav-item wallet-btn">Connect Wallet</div>
+        <router-link to="/wallet" class="nav-item wallet-btn">Connect Wallet</router-link>
         <div class="nav-item country">{{ userFlag }}</div>
-        <div class="nav-item about">ABOUT $BTM</div>
+        <router-link to="/about" class="nav-item about">ABOUT $BTM</router-link>
         <div class="social-icons">
-          <a href="#" class="twitter">
+          <a href="https://twitter.com/BTMCoin" target="_blank" class="twitter">
             <font-awesome-icon :icon="['fab', 'x-twitter']" />
           </a>
-          <a href="#" class="telegram">
+          <a href="https://t.me/BTMCoin" target="_blank" class="telegram">
             <font-awesome-icon :icon="['fab', 'telegram']" />
           </a>
         </div>
