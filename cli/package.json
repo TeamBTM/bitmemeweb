@@ -1,0 +1,28 @@
+{
+  "name": "juno-cli",
+  "version": "1.0.0",
+  "description": "CLI tool for interacting with Juno Network",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.31.3",
+    "@cosmjs/proto-signing": "^0.31.3",
+    "@cosmjs/stargate": "^0.31.1",
+    "axios": "^1.7.9",
+    "chalk": "^5.3.0",
+    "commander": "^11.0.0",
+    "dotenv": "^16.4.7",
+    "ora": "^7.0.1"
+  },
+  "keywords": [
+    "juno",
+    "blockchain",
+    "cli"
+  ],
+  "author": "",
+  "license": "ISC"
+}

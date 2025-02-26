@@ -283,6 +283,10 @@ func main() {
 	processor.StartProcessing()
 
 	r := mux.NewRouter()
+
+	// Initialize rate limiter - 10 requests per second per IP
+	rateLimiter := middleware.NewRateLimiter(1*time.Second, 10)
+
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]int64{
@@ -290,7 +294,8 @@ func main() {
 		})
 	}).Methods("GET")
 
-	r.HandleFunc("/click", func(w http.ResponseWriter, r *http.Request) {
+	// Apply rate limiter middleware to the click endpoint
+	clickHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var click Click
 		if err := json.NewDecoder(r.Body).Decode(&click); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -299,7 +304,8 @@ func main() {
 
 		processor.AddClick(click)
 		w.WriteHeader(http.StatusOK)
-	}).Methods("POST")
+	})
+	r.Handle("/click", rateLimiter.Middleware(clickHandler)).Methods("POST")
 
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
