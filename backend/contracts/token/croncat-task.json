@@ -1,0 +1,27 @@
+{
+  "name": "btm-auto-burn",
+  "description": "Automatic burn of 0.1% of BTM tokens every 15 days",
+  "cron": "0 0 */15 * *",
+  "boundary": {
+    "height": 0,
+    "time": "0001-01-01T00:00:00Z"
+  },
+  "stop_on_fail": false,
+  "rules": {
+    "timeout": 60,
+    "gas_limit": 300000
+  },
+  "actions": [{
+    "msg": {
+      "wasm": {
+        "execute": {
+          "contract_addr": "${BTM_CONTRACT_ADDRESS}",
+          "msg": {
+            "auto_burn": {}
+          },
+          "funds": []
+        }
+      }
+    }
+  }]
+}

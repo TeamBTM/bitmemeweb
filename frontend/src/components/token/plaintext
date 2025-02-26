@@ -1,0 +1,4 @@
+VITE_JUNO_CHAIN_ID=uni-6
+VITE_JUNO_RPC_URL=https://uni-rpc.reece.sh
+VITE_JUNO_REST_URL=https://uni-api.reece.sh
+VITE_BTM_CONTRACT_ADDRESS=
